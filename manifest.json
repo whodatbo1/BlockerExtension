@@ -1,0 +1,30 @@
+{
+    "name": "Block Bad Sites",
+    "description": "No more time wasted",
+    "version": "0.69",
+    "manifest_version": 3,
+    "background": {
+        "service_worker": "block.js"
+    },
+    "permissions": [
+        "tabs",
+        "bookmarks",
+        "unlimitedStorage",
+        "scripting",
+        "storage"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "/dc128.png",
+            "32": "/dc128.png",
+            "48": "/dc128.png",
+            "128": "/dc128.png"
+        }
+    },
+    "icons": { 
+        "16": "/dc128.png",
+        "48": "/dc128.png",
+       "128": "/dc128.png" 
+    }
+  }
