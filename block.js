@@ -4,20 +4,12 @@ async function getCurrentTab() {
     return tab;
 }
 
-blocked_sites = ["TheSyntesizeR", "synapse"]
-
-function getBlockedSites() {
-    return blocked_sites;
-}
-
-function blockSite(site) {
-    blocked_sites.add(site);
-}
+var bs = ["TheSyntesizeR", "synapse"]
 
 function deleteTabIfBad() {
     getCurrentTab()
         .then((tab) => {
-            blocked_sites.forEach((site) => {
+            bs.forEach((site) => {
                 if(String(tab.url).includes(site)){
                     chrome.tabs.remove(tab.id);
                 }
@@ -30,9 +22,17 @@ function deleteTabIfBad() {
 } 
 
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.set({ blocked_sites: blocked_sites });
+    chrome.storage.local.set({ blocked_sites: bs });
     console.log("Added some shit I guess");
-  });
+});
+
+chrome.storage.local.onChanged.addListener(() => {
+    chrome.storage.local.get("blocked_sites", ({ blocked_sites }) => {
+        console.log("changes");
+        console.log(blocked_sites);
+        bs = blocked_sites;
+    });
+})
 
 chrome.runtime.onInstalled.addListener(() => {
     deleteTabIfBad();
