@@ -5,12 +5,10 @@ body {
     text-align: center;
 }
 
-button {
+#block {
     height: 30px;
     width: 100px;
-    /* outline: none; */
     margin: 10px;
-    /* border: none; */
     background-color: #aa2323;
     font-weight: bolder;
     border-radius: 10px;

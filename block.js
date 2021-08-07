@@ -1,47 +1,71 @@
+/**
+ * Gets the current tab
+ * @returns tab
+ */
 async function getCurrentTab() {
     let queryOptions = { active: true, currentWindow: true };
     let [tab] = await chrome.tabs.query(queryOptions);
     return tab;
 }
 
-var bs = ["TheSyntesizeR", "synapse"]
+/**
+ * The list of keywords that should be blocked
+ */
+var keywords = []
 
-function deleteTabIfBad() {
+/**
+ * For each keyword, check whether it's contained in the tab URL.
+ * If it is, close the tab.
+ */
+function deleteTabIfContainsKeyword() {
     getCurrentTab()
         .then((tab) => {
-            bs.forEach((site) => {
+            keywords.forEach((site) => {
                 if(String(tab.url).includes(site)){
                     chrome.tabs.remove(tab.id);
                 }
             });
         })
         .catch((err) => {
-            console.log("Some error occured ");
             console.error(err);
         });
 } 
 
+/**
+ * If there exists a blocked_sites instance in local store, load it.
+ * Otherwise put an empty array in the store.
+ */
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.local.set({ blocked_sites: bs });
-    console.log("Added some shit I guess");
+    chrome.storage.local.get("blocked_sites", ({ blocked_sites }) => {
+        if (blocked_sites === undefined){
+            chrome.storage.local.set({ blocked_sites: keywords });
+            console.log("Added some shit I guess");
+        } else {
+            keywords = blocked_sites;
+        }
+    });
 });
 
+/**
+ * When the local store changes, we load up the list of blocked sites again.
+ */
 chrome.storage.local.onChanged.addListener(() => {
     chrome.storage.local.get("blocked_sites", ({ blocked_sites }) => {
-        console.log("changes");
-        console.log(blocked_sites);
-        bs = blocked_sites;
+        keywords = blocked_sites;
     });
 })
 
+/**
+ * Everytime a new tab is loaded, we check whethe we should remove it.
+ */
 chrome.runtime.onInstalled.addListener(() => {
-    deleteTabIfBad();
+    deleteTabIfContainsKeyword();
 });
 
 chrome.tabs.onActivated.addListener(() => {
-    deleteTabIfBad();
+    deleteTabIfContainsKeyword();
 });
 
 chrome.tabs.onUpdated.addListener(() => {
-    deleteTabIfBad();
+    deleteTabIfContainsKeyword();
 });

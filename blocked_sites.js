@@ -1,25 +1,26 @@
-var bs = [];
+/**
+ * The list of keywords that should be blocked
+ */
+var keywords = [];
 
-function setBS(blocked_sites){
-    bs = blocked_sites
-}
-
-function getBlockedSites() {
-    str = bs.reduce((acc, curr) => {
-        return(acc + "  ||  " + curr);
-    }, "");
-    return str;
-}
-
+/**
+ * Adds a keyword to the blocked list
+ * @param {*} site string
+ */
 function blockSite(site) {
-    if(!bs.includes(site)){
-        bs.push(site);
+    if(!keywords.includes(site)){
+        keywords.push(site);
     }
 }
 
+/**
+ * To be used for setting up the onClick events of the remove buttons.
+ * @param {*} site a string representing a keyword to be removed from the blocked list
+ * @returns A function which removes a particular word from the keyword list
+ */
 function removeSite(site){
     return function(){
-        bs = bs.filter((blocked_site) => {
+        keywords = keywords.filter((blocked_site) => {
             return blocked_site != site;
         });
         update();
@@ -31,6 +32,10 @@ function onClickBlock(){
     update();
 }
 
+/**
+ * Initial setup of the popup.
+ * Adds the onClick and keydown events to the elements.
+ */
 function setup(){
     document.getElementById("block").onclick = onClickBlock;
     document.getElementById("add_site").addEventListener("keydown", (e) => {
@@ -41,7 +46,7 @@ function setup(){
 }
 
 function updateStorage(){
-    chrome.storage.local.set({ blocked_sites: bs });
+    chrome.storage.local.set({ blocked_sites: keywords });
 }
 
 function update(){
@@ -49,7 +54,7 @@ function update(){
     while (list.firstChild) {
         list.removeChild(list.firstChild);
     }
-    str = bs.forEach((curr) => {
+    str = keywords.forEach((curr) => {
         let but = document.createElement("button");
         but.innerHTML = curr;
         but.id = curr;
@@ -59,16 +64,13 @@ function update(){
     updateStorage();
 }
 
-function getStorageInfo(saveBS){
+function getStorageInfo(){
     chrome.storage.local.get("blocked_sites", ({blocked_sites}) => {
-        saveBS(blocked_sites);
+        keywords = blocked_sites;
+        update()
     });
 }
 
-getStorageInfo((blocked_sites) => {
-    setBS(blocked_sites);
-    update();
-});
+getStorageInfo();
 
 document.addEventListener("DOMContentLoaded", setup(), false);
-document.addEventListener("update", update(), false);
