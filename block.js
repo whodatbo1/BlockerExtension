@@ -9,18 +9,13 @@ async function getCurrentTab() {
 }
 
 /**
- * The list of keywords that should be blocked
- */
-var keywords = []
-
-/**
  * For each keyword, check whether it's contained in the tab URL.
  * If it is, close the tab.
  */
-function deleteTabIfContainsKeyword() {
+function deleteTabIfContainsKeyword(blocked_sites) {
     getCurrentTab()
         .then((tab) => {
-            keywords.forEach((site) => {
+            blocked_sites.forEach((site) => {
                 if(String(tab.url).includes(site)){
                     chrome.tabs.remove(tab.id);
                 }
@@ -38,33 +33,29 @@ function deleteTabIfContainsKeyword() {
 chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.get("blocked_sites", ({ blocked_sites }) => {
         if (blocked_sites === undefined){
-            chrome.storage.local.set({ blocked_sites: keywords });
-        } else {
-            keywords = blocked_sites;
+            chrome.storage.local.set({ blocked_sites: [] });
         }
     });
 });
 
-/**
- * When the local store changes, we load up the list of blocked sites again.
- */
-chrome.storage.local.onChanged.addListener(() => {
-    chrome.storage.local.get("blocked_sites", ({ blocked_sites }) => {
+function performDelete(deleteTabIfContainsKeyword){
+    chrome.storage.local.get("blocked_sites", ({blocked_sites}) => {
         keywords = blocked_sites;
+        deleteTabIfContainsKeyword(blocked_sites);
     });
-})
+}
 
 /**
- * Everytime a new tab is loaded, we check whether we should remove it.
+ * Everytime a tab is loaded or updated, we check whether we should remove it.
  */
 chrome.runtime.onInstalled.addListener(() => {
-    deleteTabIfContainsKeyword();
+    performDelete(deleteTabIfContainsKeyword);
 });
 
 chrome.tabs.onActivated.addListener(() => {
-    deleteTabIfContainsKeyword();
+    performDelete(deleteTabIfContainsKeyword);
 });
 
 chrome.tabs.onUpdated.addListener(() => {
-    deleteTabIfContainsKeyword();
+    performDelete(deleteTabIfContainsKeyword);
 });
