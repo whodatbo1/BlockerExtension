@@ -58,16 +58,13 @@ chrome.storage.local.onChanged.addListener(() => {
  * Everytime a new tab is loaded, we check whether we should remove it.
  */
 chrome.runtime.onInstalled.addListener(() => {
-    console.log(keywords);
     deleteTabIfContainsKeyword();
 });
 
 chrome.tabs.onActivated.addListener(() => {
-    console.log(keywords);
     deleteTabIfContainsKeyword();
 });
 
 chrome.tabs.onUpdated.addListener(() => {
-    console.log(keywords);
     deleteTabIfContainsKeyword();
 });
