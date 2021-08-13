@@ -1,16 +1,15 @@
 /**
- * The list of keywords that should be blocked
- */
-var keywords = [];
-
-/**
  * Adds a keyword to the blocked list
  * @param {*} site string
  */
-function blockSite(site) {
-    if(!keywords.includes(site)){
-        keywords.push(site);
-    }
+function addSite(site) {
+    performAction(performActionCallback, function(blocked_sites){
+        if(!blocked_sites.includes(site)){
+            blocked_sites.push(site);
+        }
+        console.log("Added site:", String(site))
+        updateStorage(blocked_sites);
+    });
 }
 
 /**
@@ -19,17 +18,23 @@ function blockSite(site) {
  * @returns A function which removes a particular word from the keyword list
  */
 function removeSite(site){
-    return function(){
-        keywords = keywords.filter((blocked_site) => {
+    performAction(performActionCallback, function(blocked_sites){
+        blocked_sites = blocked_sites.filter((blocked_site) => {
             return blocked_site != site;
         });
-        update();
+        console.log("Removed site:", String(site))
+        updateStorage(blocked_sites);
+    });
+}
+
+function removeOnClick(site){
+    return function() {
+        removeSite(site);
     }
 }
 
 function onClickBlock(){
-    blockSite(document.getElementById("add_site").value);
-    update();
+    addSite(document.getElementById("add_site").value);
 }
 
 /**
@@ -45,32 +50,34 @@ function setup(){
     });
 }
 
-function updateStorage(){
-    chrome.storage.local.set({ blocked_sites: keywords });
-}
-
-function update(){
-    let list = document.getElementById("blocked_list");
+function updateStorage(blocked_sites){
+    let list = document.getElementById("blocked_list")
     while (list.firstChild) {
         list.removeChild(list.firstChild);
     }
-    str = keywords.forEach((curr) => {
-        let but = document.createElement("button");
-        but.innerHTML = curr;
-        but.id = curr;
-        but.onclick = removeSite(curr);
-        document.getElementById("blocked_list").appendChild(but);
+    blocked_sites.forEach((curr) => {
+        console.log(curr);
+        let element = document.getElementById(String(curr))
+        let button = document.createElement("button");
+        button.innerHTML = curr;
+        button.id = curr;
+        button.onclick = removeOnClick(curr);
+        document.getElementById("blocked_list").appendChild(button);
     });
-    updateStorage();
+    chrome.storage.local.set({ blocked_sites: blocked_sites });
 }
 
-function getStorageInfo(){
+function performAction(performActionCallback, actionCallback){
     chrome.storage.local.get("blocked_sites", ({blocked_sites}) => {
         keywords = blocked_sites;
-        update()
+        performActionCallback(blocked_sites, actionCallback);
     });
 }
 
-getStorageInfo();
+function performActionCallback(blocked_sites, actionCallback){
+    actionCallback(blocked_sites);
+}
+
+performAction(performActionCallback, updateStorage);
 
 document.addEventListener("DOMContentLoaded", setup(), false);

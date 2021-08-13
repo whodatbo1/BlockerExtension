@@ -39,7 +39,6 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.storage.local.get("blocked_sites", ({ blocked_sites }) => {
         if (blocked_sites === undefined){
             chrome.storage.local.set({ blocked_sites: keywords });
-            console.log("Added some shit I guess");
         } else {
             keywords = blocked_sites;
         }
@@ -56,16 +55,19 @@ chrome.storage.local.onChanged.addListener(() => {
 })
 
 /**
- * Everytime a new tab is loaded, we check whethe we should remove it.
+ * Everytime a new tab is loaded, we check whether we should remove it.
  */
 chrome.runtime.onInstalled.addListener(() => {
+    console.log(keywords);
     deleteTabIfContainsKeyword();
 });
 
 chrome.tabs.onActivated.addListener(() => {
+    console.log(keywords);
     deleteTabIfContainsKeyword();
 });
 
 chrome.tabs.onUpdated.addListener(() => {
+    console.log(keywords);
     deleteTabIfContainsKeyword();
 });
