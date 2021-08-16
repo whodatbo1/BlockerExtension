@@ -40,7 +40,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 function performDelete(deleteTabIfContainsKeyword){
     chrome.storage.local.get("blocked_sites", ({blocked_sites}) => {
-        keywords = blocked_sites;
+        console.log(blocked_sites);
         deleteTabIfContainsKeyword(blocked_sites);
     });
 }

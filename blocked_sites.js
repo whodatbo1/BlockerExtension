@@ -25,6 +25,20 @@ function removeSite(site){
 }
 
 /**
+ * Adds the URL of the currently active tab to the blocked list
+ */
+function blockCurrent(){
+    let queryOptions = { active: true, currentWindow: true };
+    chrome.tabs.query(queryOptions).then((tab) => {
+        console.log(tab[0]);
+        console.log(tab[0].url);
+        if(tab[0].url){
+            addSite(tab[0].url)
+        };
+    })
+}
+
+/**
  * Sets up the onClick events of the individual site buttons
  * @param {*} site string
  * @returns the onClick function
@@ -48,6 +62,7 @@ function onClickBlock(){
  */
 function setup(){
     document.getElementById("block").onclick = onClickBlock;
+    document.getElementById("block_current").onclick = blockCurrent;
     document.getElementById("add_site").addEventListener("keydown", (e) => {
         if(e.code=="Enter"){
             onClickBlock()
